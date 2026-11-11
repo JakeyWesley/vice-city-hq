@@ -579,8 +579,15 @@ setInterval(updateAllCountdowns,1000);
  const boot=document.getElementById('vc-boot'), enter=document.getElementById('vc-boot-enter'), disable=document.getElementById('vc-boot-disable');
  try{if(localStorage.getItem('vchq_boot_skip')==='1')boot.classList.add('hide')}catch(e){}
  enter.addEventListener('click',()=>{try{if(disable.checked)localStorage.setItem('vchq_boot_skip','1')}catch(e){}boot.classList.add('hide')});
- const names=['VICE WAVE','AFTER HOURS','UNDERGROUND','ROCK RADIO','OCEAN DRIVE'];let urls=Array(5).fill(''),active=0;
- try{const saved=JSON.parse(localStorage.getItem('vchq_vcfm_playlists')||'null');if(Array.isArray(saved))urls=names.map((_,i)=>saved[i]||'')}catch(e){}
+ const names=['VICE WAVE','AFTER HOURS','UNDERGROUND','ROCK RADIO','OCEAN DRIVE'];
+ const defaultUrls=[
+  'https://open.spotify.com/playlist/37i9dQZF1EIcwQjfM8Wvly',
+  'https://open.spotify.com/playlist/37i9dQZF1EId9cZrsKjzaP',
+  'https://open.spotify.com/playlist/37i9dQZF1EIgQRmB8zPljk',
+  'https://open.spotify.com/playlist/1c8Pv31XY7sfkTxT1tkCCG',
+  'https://open.spotify.com/playlist/37i9dQZF1EIdod6AoGDkLC'
+ ];let urls=defaultUrls.slice(),active=0;
+ try{const saved=JSON.parse(localStorage.getItem('vchq_vcfm_playlists')||'null');if(Array.isArray(saved))urls=names.map((_,i)=>saved[i]||defaultUrls[i])}catch(e){}
  const panel=document.getElementById('vcfm-panel'),launcher=document.getElementById('vcfm-launcher'),placeholder=document.getElementById('vcfm-embed-placeholder'),openLink=document.getElementById('vcfm-open-spotify'),now=document.getElementById('vcfm-now');
  const fields=document.getElementById('vcfm-fields');
  fields.innerHTML=names.map((n,i)=>`<label for="vcfm-url-${i}">${n} — Spotify playlist URL</label><input id="vcfm-url-${i}" type="url" inputmode="url" placeholder="https://open.spotify.com/playlist/…">`).join('');
@@ -591,7 +598,7 @@ setInterval(updateAllCountdowns,1000);
  launcher.addEventListener('click',()=>{panel.classList.toggle('open');launcher.setAttribute('aria-expanded',panel.classList.contains('open')?'true':'false')});
  document.getElementById('vcfm-close').addEventListener('click',()=>{panel.classList.remove('open');launcher.setAttribute('aria-expanded','false')});
  document.getElementById('vcfm-save').addEventListener('click',()=>{urls=names.map((_,i)=>document.getElementById('vcfm-url-'+i).value.trim());try{localStorage.setItem('vchq_vcfm_playlists',JSON.stringify(urls))}catch(e){}choose(active)});
- document.getElementById('vcfm-clear').addEventListener('click',()=>{urls=Array(5).fill('');names.forEach((_,i)=>document.getElementById('vcfm-url-'+i).value='');try{localStorage.removeItem('vchq_vcfm_playlists')}catch(e){}choose(active)});
+ document.getElementById('vcfm-clear').addEventListener('click',()=>{urls=defaultUrls.slice();names.forEach((_,i)=>document.getElementById('vcfm-url-'+i).value=urls[i]);try{localStorage.setItem('vchq_vcfm_playlists',JSON.stringify(urls))}catch(e){}choose(active)});
  choose(0);
 })();
 </script>

@@ -1,9 +1,7 @@
-VICE CITY HQ V6.13
+VICE CITY HQ V6.14
 
-Upload index.html to the root of your GitHub Pages repository, replacing the previous index.html.
+VC FM now includes five default Spotify playlist links supplied by the owner. They are built into the website so they appear on every device/browser that loads this version. You can still customise the station links in Station Setup; custom changes are saved in that browser only until cloud sync is implemented.
 
-VC FM SAFE MODE: VC FM stores your playlist links locally in this browser and opens the selected playlist using Spotify. It does not embed, stream, copy, or rebroadcast Spotify audio. Full playback is handled by Spotify in its app or website and requires your Spotify account.
+Upload index.html and README.txt to the root of the existing GitHub Pages repository, replacing the previous files. Keep earlier ZIP builds as backups.
 
-Your dashboard data remains browser-local. Export a backup in Settings before changing devices or clearing browser data.
-
-Keep your V6.11 and V6.12 ZIP backups.
+Spotify playback is handled by Spotify when you tap LISTEN ON SPOTIFY. This website does not host or stream Spotify audio.
