@@ -606,4 +606,88 @@ setInterval(updateAllCountdowns,1000);
 })();
 </script>
 
+
+<style>
+#hq-cloud-launch{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:8998;border:1px solid #4ce6df88;background:linear-gradient(135deg,#102b32f5,#171126f5);box-shadow:0 8px 28px #0009,0 0 18px #4ce6df22;border-radius:999px;padding:10px 14px;color:#fff;font-weight:900;font-size:11px;letter-spacing:.08em}
+#hq-cloud-modal{display:none;position:fixed;inset:0;z-index:12000;background:#050611ed;backdrop-filter:blur(12px);padding:20px;overflow:auto;align-items:center;justify-content:center}
+#hq-cloud-modal.open{display:flex}
+#hq-cloud-card{width:min(100%,460px);background:linear-gradient(145deg,#21142f,#0c1725);border:1px solid #4ce6df77;border-radius:18px;padding:22px;box-shadow:0 20px 70px #000c}
+#hq-cloud-card h2{margin:0 0 8px;color:#ff78b8}#hq-cloud-card p{color:#c9bfd7;font-size:13px}
+#hq-cloud-card label{display:block;margin:12px 0 5px;color:#c9bfd7;font-size:11px}
+#hq-cloud-card input{width:100%;padding:12px;background:#080d19;color:white;border:1px solid #ffffff35;border-radius:9px}
+#hq-cloud-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+#hq-cloud-status{font-size:11px;color:#4ce6df;margin-top:12px;min-height:18px}
+</style>
+<button id="hq-cloud-launch" type="button">☁ HQ CLOUD</button>
+<div id="hq-cloud-modal" role="dialog" aria-modal="true" aria-label="Vice City HQ cloud sync">
+ <div id="hq-cloud-card">
+  <div class="eyebrow">VICE CITY HQ · PRIVATE CLOUD</div>
+  <h2>Connect your HQ</h2>
+  <p>Sign in with the account you created in Supabase. Your first upload will copy this phone's current HQ data and station links to your private cloud.</p>
+  <label for="hq-cloud-email">Email</label><input id="hq-cloud-email" type="email" autocomplete="username" placeholder="Your email">
+  <label for="hq-cloud-password">Password</label><input id="hq-cloud-password" type="password" autocomplete="current-password" placeholder="Your password">
+  <div id="hq-cloud-actions">
+   <button class="primary" id="hq-cloud-login" type="button">SIGN IN & CONNECT</button>
+   <button id="hq-cloud-close" type="button">CLOSE</button>
+  </div>
+  <div id="hq-cloud-status">Not connected. Your existing local HQ data is untouched.</div>
+ </div>
+</div>
+<script>
+(()=>{
+const URL="https://qzrudrmyoinermyfrerz.supabase.co";
+const KEY="sb_publishable_s_5uBYo-YsDzyh1jA1nc8Q_xRyG3p5K";
+const SESSION_KEY='vchq_supabase_session_v1';
+const launch=document.getElementById('hq-cloud-launch'),modal=document.getElementById('hq-cloud-modal');
+const status=document.getElementById('hq-cloud-status'),email=document.getElementById('hq-cloud-email'),password=document.getElementById('hq-cloud-password');
+let session=null, syncing=false, timer=null;
+const say=t=>status.textContent=t;
+function open(){modal.classList.add('open')}
+function close(){modal.classList.remove('open')}
+launch.addEventListener('click',open);document.getElementById('hq-cloud-close').addEventListener('click',close);
+async function api(path,opts={}){const headers={'apikey':KEY,'Content-Type':'application/json',...(opts.headers||{})};if(session?.access_token)headers.Authorization='Bearer '+session.access_token;const r=await fetch(URL+path,{...opts,headers});const txt=await r.text();let data;try{data=JSON.parse(txt)}catch{data=txt}if(!r.ok)throw new Error(data?.msg||data?.message||data?.error_description||data?.error||('Request failed ('+r.status+')'));return data}
+function localPayload(){let playlists=[];try{playlists=JSON.parse(localStorage.getItem('vchq_vcfm_playlists')||'[]')}catch{}return {app:d,playlists,updated_at:new Date().toISOString(),schema_version:1}}
+async function pushCloud(){if(!session||syncing)return;syncing=true;try{await api('/rest/v1/hq_data?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:session.user.id,data:localPayload(),updated_at:new Date().toISOString()})});say('Connected · latest changes saved to your private cloud');launch.textContent='☁ HQ SYNCED'}catch(e){say('Cloud save failed: '+e.message)}finally{syncing=false}}
+function schedulePush(){if(!session)return;clearTimeout(timer);timer=setTimeout(pushCloud,900)}
+async function connect(){
+ const em=email.value.trim(),pw=password.value;
+ if(!em||!pw){say('Enter your email and password first.');return}
+ say('Signing in securely…');
+ try{
+  const s=await fetch(URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw})});
+  const result=await s.json();if(!s.ok)throw new Error(result.msg||result.message||result.error_description||'Sign-in failed');
+  session=result;localStorage.setItem(SESSION_KEY,JSON.stringify({access_token:result.access_token,refresh_token:result.refresh_token,expires_at:Date.now()+(result.expires_in||3600)*1000,user:result.user}));
+  say('Signed in. Checking your private cloud…');
+  const rows=await api('/rest/v1/hq_data?select=data&user_id=eq.'+encodeURIComponent(session.user.id),{method:'GET'});
+  if(!rows.length){
+   say('First upload: copying this phone’s dashboard, cat portraits and Spotify stations…');
+   await pushCloud();
+   say('First upload complete. This phone is now your master copy.');
+  }else{
+   const cloud=rows[0].data||{};
+   if(!cloud.app){say('A cloud record exists but has an older format. Local data has been left untouched. Contact support before continuing.');return}
+   const useCloud=confirm('A cloud backup already exists. Press OK to load the cloud copy onto this phone, or Cancel to keep this phone’s data and upload it to the cloud.');
+   if(useCloud){
+    d={...base,...cloud.app};save();
+    if(Array.isArray(cloud.playlists))localStorage.setItem('vchq_vcfm_playlists',JSON.stringify(cloud.playlists));
+    location.reload();return;
+   }else{await pushCloud();say('This phone’s data has been uploaded to the cloud.');}
+  }
+  password.value='';launch.textContent='☁ HQ SYNCED';
+ }catch(e){say('Could not connect: '+e.message)}
+}
+document.getElementById('hq-cloud-login').addEventListener('click',connect);
+try{const saved=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');if(saved?.refresh_token){
+ fetch(URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:saved.refresh_token})})
+ .then(r=>r.ok?r.json():Promise.reject()).then(s=>{session=s;localStorage.setItem(SESSION_KEY,JSON.stringify({access_token:s.access_token,refresh_token:s.refresh_token,expires_at:Date.now()+(s.expires_in||3600)*1000,user:s.user}));launch.textContent='☁ HQ SYNCED';say('Connected to your private cloud');})
+ .catch(()=>{localStorage.removeItem(SESSION_KEY);});
+}}catch{}
+const originalSave=save;
+save=function(){originalSave();schedulePush()};
+document.getElementById('vcfm-save').addEventListener('click',()=>setTimeout(schedulePush,100));
+document.getElementById('vcfm-clear').addEventListener('click',()=>setTimeout(schedulePush,100));
+window.addEventListener('beforeunload',()=>{if(session&&timer){clearTimeout(timer);pushCloud()}});
+})();
+</script>
+
 </body></html>
