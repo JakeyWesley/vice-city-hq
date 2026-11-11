@@ -1,5 +1,13 @@
-VICE CITY HQ V6.11 — VERTICAL F1 SESSION CARDS
+VICE CITY HQ — V6.12
 
-The five F1 session cards now use a vertical layout: each full landscape image sits above the session information and live countdown. Images preserve their complete 2:1 artwork without cropping baked-in FP1/FP2/FP3/QUALI/RACE labels. Session details and four countdown units sit below in a clean, consistent panel.
+Upload index.html to the root of your GitHub repository to publish this update.
+V6.11 remains available as your original backup ZIP.
 
-All other V6.10 artwork, countdown logic, Sports banner, Matchday Showdown, navigation, app sections and vchq_v5 local-storage key are retained. Artwork embedded in index.html; no assets folder required. Open in the same browser to retain local data. Keep a backup.
+V6.12 adds a first-visit cinematic startup screen and VC FM station interface.
+VC FM uses Spotify's official embedded playlist player. Open VC FM, expand
+Station Setup, paste a Spotify playlist URL for each station, and tap Save.
+You must have internet access; Spotify controls playback and account availability.
+
+The startup skip choice and VC FM playlist URLs are saved in this browser's
+local storage. They are not synchronised between devices. Existing HQ data
+continues to use the existing app storage key.
