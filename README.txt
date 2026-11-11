@@ -1,22 +1,17 @@
-VICE CITY HQ — V6.15: THE CAT DIVISION UPDATE
+VICE CITY HQ — V6.16: CAT PORTRAIT DISPLAY FIX
 
-This build is based on your uploaded V6.14 archive (which contains the V6.13 app files).
+Based on V6.15.
 
-What's new:
-- Bundled portrait photos for Jorge, Lando, Max and Carlos.
-- Existing cat profile names, roles and bios retained.
-- Older saved profiles with blank cat photos are upgraded automatically.
-- Any custom cat photos already saved in the browser are preserved.
-- Spotify station playlist defaults and the VC FM playlist launcher are preserved.
-- Existing local browser data key (vchq_v5) is preserved.
+Fixes:
+- Removed the decorative dark gradient overlay that was obscuring the cat photos.
+- Changed the portrait frame to a taller 3:4 shape.
+- Portrait images now use contain sizing so the full original photo remains visible.
+- Preserves the four bundled cat photos, profiles, Spotify playlist links and existing local-storage key.
 
-Install/update:
+Install:
 1. Extract this ZIP.
-2. Upload the included index.html to the root of your GitHub Pages repository, replacing the existing index.html.
-3. Commit the change and wait for GitHub Pages to publish.
-4. Refresh your site. If the old version is cached, refresh again or open the site in a private tab to test.
+2. Upload index.html to the root of your GitHub Pages repository, replacing the existing file.
+3. Commit the change and wait for Pages to publish.
+4. Refresh the live site.
 
-Notes:
-- This is a static site. Data saved in browser localStorage remains local to that browser/device.
-- Spotify opens playlists in the official Spotify app or website; this site does not stream full tracks itself.
-- Keep your V6.14 ZIP as a rollback backup.
+Keep your V6.14 and V6.15 ZIPs as backups.
