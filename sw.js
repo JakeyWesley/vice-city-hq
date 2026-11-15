@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vice-city-hq-shell-v2';
+const CACHE_NAME = 'vice-city-hq-shell-v1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -30,6 +30,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  // App navigation: try the latest page, then fall back to the cached app shell.
   if (request.mode === 'navigate') {
     event.respondWith((async () => {
       try {
@@ -46,6 +47,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Same-origin app assets: cache-first for reliable repeat/offline access.
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (cached) return cached;
@@ -57,7 +59,7 @@ self.addEventListener('fetch', event => {
       }
       return response;
     } catch {
-      return cached;
+      return Response.error();
     }
   })());
 });
